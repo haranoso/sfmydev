@@ -28,8 +28,7 @@ jobs:
         with:
           ref: ${{ Github.ref }}
           fetch-depth: 0
-        if Github.event.action =='opend' || Github.event/action =='synchronize' || Github.event_name == 'push'
-
+        if: Github.event.action =='opend' || Github.event/action =='synchronize' || Github.event_name == 'push'
       - uses: actions/setup-node@v1
         with:
           node-version: '>=14'
