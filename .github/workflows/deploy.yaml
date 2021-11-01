@@ -48,9 +48,9 @@ jobs:
       - name: 'Authenticate against dec hub'
         run: node_modules/sfdx-cli/bin/run force:auth:sfdxurl:store -f SFDX_AUTH_URL_FILE -s -a MYDEV
 
-      - name: Run apex test
-        run :
-          node_modules/sfdx_cli/bin/run force:apex:test:run --resultformat tap --codecoverage -c -r human
+#      - name: Run apex test
+#        run :
+#          node_modules/sfdx_cli/bin/run force:apex:test:run --resultformat tap --codecoverage -c -r human
 
       - name: Deploy Source
         id: Deploy
