@@ -46,8 +46,14 @@ jobs:
       - name: 'retrieve devhub'
         run: node_modules/sfdx-cli/bin/run force:source:retrieve --manifest ./manifest/package.xml
 
-      - name: 'commit meta'
+      - name: 'commit meta fetch'
         run: git fetch
+
+      - name: 'commit meta add'
         run: git add ./force-app
+
+      - name: 'commit meta commit'
         run: git commit -m "test"
+
+      - name: 'commit meta push'
         run: git push origin HEAD
