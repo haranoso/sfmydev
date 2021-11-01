@@ -28,7 +28,7 @@ jobs:
         with:
           ref: ${{ Github.ref }}
           fetch-depth: 0
-        if: Github.event.action =='opend' || Github.event.action =='synchronize' || Github.event_name == 'push'
+        if: Github.event.action =='opend' || Github.event/action =='synchronize' || Github.event_name == 'push'
       - uses: actions/setup-node@v1
         with:
           node-version: '>=14'
@@ -41,12 +41,12 @@ jobs:
           node_modules/sfdx-cli/bin/run --version
           node_modules/sfdx-cli/bin run plugins --core
       
-      - name: 'SFDX_URL secret'
+      - name: 'SFDX_AUTH_URLをSFDX_AUTH_URL_FILEファイルに保存'
         shell: bash
-        run : 'echo ${{  secrets.SFDX_LR_TEST_URL }} > SFDX_QA'
+        run : 'echo ${{  secrets.SFDX_AUTH_URL }} > SFDX_AUTH_URL_FILE'
 
       - name: 'Authenticate against dec hub'
-        run: node_modules/sfdx-cli/bin/run force:auth:sfdxurl:store -f SFDX_QA -s -a LRQA
+        run: node_modules/sfdx-cli/bin/run force:auth:sfdxurl:store -f SFDX_AUTH_URL_FILE -s -a MYDEV
 
       - name: Run apex test
         run :
@@ -56,4 +56,4 @@ jobs:
         id: Deploy
         if: Github.event_name == 'push'
         run:
-         node_modules/sfdx_cli/bin/run force:sorce:deploy -p diffdeploy/force-app -u LRQA --json --loglevel fatal 
+         node_modules/sfdx_cli/bin/run force:sorce:deploy -p diffdeploy/force-app -u MYDEV --json --loglevel fatal 
