@@ -34,7 +34,7 @@ jobs:
         run: |
           pwd
           ls -ltr
-          cat ./manifest/package.xml
+#          cat ./manifest/package.xml
 
 #          npm install sfdx-cli
 #          node_modules/sfdx-cli/bin/run --version
