@@ -61,7 +61,7 @@ jobs:
            git add ./force-app
       - name: '  commit'
         run: |
-           git commit -m "test"
+           git commit -m "retrieve"
       - name: '  push'
         run: |
            git push origin HEAD
