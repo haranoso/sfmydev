@@ -28,9 +28,11 @@ jobs:
       # Install Salesforce CLI
       - name: Install Salesforce CLI
         run: |
-          pwd
-          ls -ltr
-          cat ./manifest/package.xml
+          DSTDIR=./force-app
+
+          if [ ! -d $DSTDIR ]; then
+            mkdir $DSTDIR
+          fi
 
           npm install sfdx-cli
           node_modules/sfdx-cli/bin/run --version
