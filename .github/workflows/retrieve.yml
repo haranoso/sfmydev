@@ -40,7 +40,7 @@ jobs:
         shell: bash
         run : 'echo ${{  secrets.SFDX_AUTH_URL }} > SFDX_AUTH_URL_FILE'
 
-      - name: 'Authenticate against dec hub'
+      - name: 'Authenticate'
         run: node_modules/sfdx-cli/bin/run force:auth:sfdxurl:store -f SFDX_AUTH_URL_FILE -s -a MYDEV
 
       - name: 'retrieve devhub'
