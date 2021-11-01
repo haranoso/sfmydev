@@ -20,10 +20,10 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-#      - uses: actions/setup-node@v1
-#        with:
-#          node-version: '>=14'
-#          check-latest: true
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '>=14'
+          check-latest: true
         
       # Install Salesforce CLI
       - name: Install Salesforce CLI
@@ -32,22 +32,23 @@ jobs:
           ls -ltr
           cat ./manifest/package.xml
 
-#          npm install sfdx-cli
-#          node_modules/sfdx-cli/bin/run --version
-#          node_modules/sfdx-cli/bin/run plugins --core
+          npm install sfdx-cli
+          node_modules/sfdx-cli/bin/run --version
+          node_modules/sfdx-cli/bin/run plugins --core
       
-#      - name: 'SFDX_AUTH_URLをSFDX_AUTH_URL_FILEファイルに保存'
-#        shell: bash
-#        run : 'echo ${{  secrets.SFDX_AUTH_URL }} > SFDX_AUTH_URL_FILE'
+      - name: 'SFDX_AUTH_URLをSFDX_AUTH_URL_FILEファイルに保存'
+        shell: bash
+        run : 'echo ${{  secrets.SFDX_AUTH_URL }} > SFDX_AUTH_URL_FILE'
 
-#      - name: 'Authenticate'
-#        run: node_modules/sfdx-cli/bin/run force:auth:sfdxurl:store -f SFDX_AUTH_URL_FILE -s -a MYDEV
+      - name: 'Authenticate'
+        run: node_modules/sfdx-cli/bin/run force:auth:sfdxurl:store -f SFDX_AUTH_URL_FILE -s -a MYDEV
 
-#      - name: 'retrieve devhub'
-#        run: node_modules/sfdx-cli/bin/run force:source:retrieve --manifest ./manifest/package.xml
+      - name: 'retrieve devhub'
+        run: node_modules/sfdx-cli/bin/run force:source:retrieve --manifest ./manifest/package.xml
 
-#      - name: 'commit meta fetch'
-#        run: |
+      - name: 'commit meta fetch'
+        run: |
+        ls -ltr ./force-app/
 #          git fetch
 #          git add ./force-app
 #          git commit -m "test"
