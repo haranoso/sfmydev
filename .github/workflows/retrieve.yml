@@ -20,14 +20,10 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-        with:
-          ref: ${{ Github.ref }}
-          fetch-depth: 0
-        if: Github.event.action =='opend' || Github.event.action =='synchronize' || Github.event_name == 'push'
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '>=14'
-          check-latest: true
+#      - uses: actions/setup-node@v1
+#        with:
+#          node-version: '>=14'
+#          check-latest: true
         
       # Install Salesforce CLI
       - name: Install Salesforce CLI
