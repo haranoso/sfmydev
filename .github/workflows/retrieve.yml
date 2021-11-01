@@ -32,9 +32,15 @@ jobs:
       # Install Salesforce CLI
       - name: Install Salesforce CLI
         run: |
+          pwd
+          ls -ltr
+          cat ./manifest/package.xml
+
           npm install sfdx-cli
           node_modules/sfdx-cli/bin/run --version
           node_modules/sfdx-cli/bin/run plugins --core
+          pwd
+          cat ./manifest/package.xml
       
       - name: 'SFDX_AUTH_URLをSFDX_AUTH_URL_FILEファイルに保存'
         shell: bash
@@ -47,13 +53,8 @@ jobs:
         run: node_modules/sfdx-cli/bin/run force:source:retrieve --manifest ./manifest/package.xml
 
       - name: 'commit meta fetch'
-        run: git fetch
-
-      - name: 'commit meta add'
-        run: git add ./force-app
-
-      - name: 'commit meta commit'
-        run: git commit -m "test"
-
-      - name: 'commit meta push'
-        run: git push origin HEAD
+        run: |
+          git fetch
+          git add ./force-app
+          git commit -m "test"
+          git push origin HEAD
