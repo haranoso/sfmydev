@@ -48,7 +48,7 @@ jobs:
 
       - name: 'commit meta fetch'
         run: |
-           ls -R./force-app/
+           ls -R ./force-app/
 #          git fetch
 #          git add ./force-app
 #          git commit -m "test"
