@@ -39,7 +39,7 @@ jobs:
         run: |
           npm install sfdx-cli
           node_modules/sfdx-cli/bin/run --version
-          node_modules/sfdx-cli/bin run plugins --core
+          node_modules/sfdx-cli/bin/run plugins --core
       
       - name: 'SFDX_AUTH_URLをSFDX_AUTH_URL_FILEファイルに保存'
         shell: bash
