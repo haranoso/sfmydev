@@ -1,0 +1,84 @@
+<apex:page docType="html-5.0" sidebar="false" showHeader="false">
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <script src="http://fb.me/JSXTransformer-0.12.1.js"></script>
+　　<link href="{!URLFOR($Resource.reactTest, 'build/static/css/main.2c3dd04b.css')}" rel="stylesheet" />
+    <script src="{!URLFOR($Resource.reactTest, 'build/static/js/main.0bb055fe.js')}"/>
+
+    <apex:remoteObjects jsNamespace="EnqueteModels">
+        <apex:remoteObjectModel name="Enquete__c" jsShorthand="enquete" fields="Id,Name">
+            <apex:remoteObjectField name="Q1__c" jsShorthand="q1"/>
+            <apex:remoteObjectField name="Q2__c" jsShorthand="q2"/>
+            <apex:remoteObjectField name="Q3__c" jsShorthand="q3"/>
+            <apex:remoteObjectField name="Q4__c" jsShorthand="q4"/>
+            <apex:remoteObjectField name="Q5__c" jsShorthand="q5"/>
+            <apex:remoteObjectField name="Q6__c" jsShorthand="q6"/>
+            <apex:remoteObjectField name="Q7__c" jsShorthand="q7"/>
+            <apex:remoteObjectField name="Q8__c" jsShorthand="q8"/>
+            <apex:remoteObjectField name="Q9__c" jsShorthand="q9"/>
+        </apex:remoteObjectModel>
+    </apex:remoteObjects>
+    
+    
+    <script type="text/jsx">
+        import React from 'react';
+        import ReactDOM from 'react-dom';
+        
+        var saveData = {};
+
+        var QAData = [
+            ["q1", "text", "Q3：次のテキストボックスに回答を記入してください。</br>（120文字まで）", "qq"],
+            ["q2", "check", "Q1：次のチェックボックスから選択してください。", ["a1", "a2", "a3", "a4"]],
+            ["q3", "radio", "Q2：次のラジオボタンから選択してください。", ["a1", "a2", "a3", "a4"]],
+            ["q4", "text", "Q4：次のテキストボックスに回答を記入してください。", "ee"],
+            ["q5", "text", "Q5：次のテキストボックスに回答を記入してください。", "frfr"],
+            ["q6", "text", "Q6：次のテキストボックスに回答を記入してください。q6", "ee"],
+            ["q7", "text", "Q7：・・・", "vrbgryny"],
+            ["q8", "text", "Q8：・・・", "webwe"],
+            ["q9", "text", "Q9：・・・<br>2<br>3<br>4<br>5<br>6", "ee"]
+        ];
+
+        savePage = function(){
+            var myObj = new EnqueteModels.enquete();
+            console.log(">>>",saveData);
+            saveData['Name'] = 'test' + new Date();
+            var data = convertData(saveData);
+            myObj.create(data, function(err) {
+                if(err) { 
+                    console.log(err);
+                    alert(err.message);
+                }
+                else {
+                    // this is the contact
+                    console.log(myObj.log());     // Dump contact to log
+                    console.log(myObj.get('Id')); // Id is set when create completes
+                }
+            });
+        }
+
+        convertData = function(inData){
+            var ret = {};
+            for (key in inData　){
+                var val = inData[key];
+                ret[key] = JSON.stringify(val,null,'\t');
+            }
+            return ret
+        }
+
+        //ここまで、外部ファイルに切り出しできるはず。
+        ReactDOM.render(
+            <AppBase data={QAData} savepage={savePage}/>,
+            document.getElementById('app-container'));
+
+    </script>
+</head>
+
+<body>
+    <div id="app-container"> </div>
+    
+</body>
+</html>
+</apex:page>

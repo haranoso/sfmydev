@@ -1,0 +1,4 @@
+<aura:component >
+    <ltng:require scripts="{!$Resource.jQ2}" afterScriptsLoaded="{!c.init}" />
+    <div class="fullscreen"></div>
+</aura:component>

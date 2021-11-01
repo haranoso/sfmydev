@@ -1,0 +1,16 @@
+<apex:page standardController="NB_EApplication__c" id="pp" extensions="EApplicationtController">
+<script type="text/javascript">
+    /*懇親会のある説明会を選んだ時だけ懇親会選択フォームが開くようにする*/
+    function checkKonshinkai(){
+        var a = document.querySelector("input[name$='kkform:guidanceKK']:checked").nextElementSibling.textContent;
+        document.getElementById("konshinkai").style.display =a.indexOf('あり')!=-1?'block':'none';
+    }
+</script>
+<apex:form id="kkform">
+<apex:outputField value="{!NB_EApplication__c.NB_AppDocNo__c}"/>
+ <apex:selectRadio border="0" value="{!radio}" layout="pageDirection" onclick="checkKonshinkai()" id="guidanceKK">
+ <apex:selectOptions value="{!SelectOptions}" />
+ </apex:selectRadio>
+ <div id="konshinkai"><p>あり</p></div>
+</apex:form>
+</apex:page>

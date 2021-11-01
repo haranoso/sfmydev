@@ -1,0 +1,621 @@
+<apex:page docType="html-5.0" sidebar="false" showHeader="false">
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <script src="https://fb.me/JSXTransformer-0.12.1.js"></script>
+    <script src="https://fb.me/react-0.14.3.js"></script>
+    <script src="https://fb.me/react-dom-0.14.3.js"></script>
+    <!-- script type="text/jsx" src="{!URLFOR($Resource.reactComponents, 'reactComponents/Components.jsx')}" / -->
+    <!-- link href="{!URLFOR($Resource.reactComponents, 'reactComponents/App.css')}" rel="stylesheet" / -->
+
+    <apex:remoteObjects jsNamespace="EnqueteModels">
+        <apex:remoteObjectModel name="Enquete__c" jsShorthand="enquete" fields="Id,Name">
+            <apex:remoteObjectField name="Q1__c" jsShorthand="q1"/>
+            <apex:remoteObjectField name="Q2__c" jsShorthand="q2"/>
+            <apex:remoteObjectField name="Q3__c" jsShorthand="q3"/>
+            <apex:remoteObjectField name="Q4__c" jsShorthand="q4"/>
+            <apex:remoteObjectField name="Q5__c" jsShorthand="q5"/>
+            <apex:remoteObjectField name="Q6__c" jsShorthand="q6"/>
+            <apex:remoteObjectField name="Q7__c" jsShorthand="q7"/>
+            <apex:remoteObjectField name="Q8__c" jsShorthand="q8"/>
+            <apex:remoteObjectField name="Q9__c" jsShorthand="q9"/>
+        </apex:remoteObjectModel>
+    </apex:remoteObjects>
+    
+    <script type="text/javascript">
+    </script>
+    
+    <script type="text/jsx">
+        var saveData = {};
+        var uname = '{!$User.LastName} {!$User.FirstName}';
+        var unameId = '{!$User.LastName}_{!$User.FirstName}_{!$User.Id}';
+
+       var QAData = [
+            ["q1", "text",  "Q1：次のテキストボックスに回答を記入してください。<br>（120文字まで）", "","1"],
+            ["q2", "check", "Q2：次のチェックボックスから選択してください。", ["a1", "a2", "a3", "a4"],""],
+            ["q3", "radio", "Q3：次のラジオボタンから選択してください。", ["a1", "a2", "a3", "a4"],""],
+            ["q4", "textarea",  "Q4：次のテキストボックスに回答を記入してください。", "",""],
+            ["q5", "text",  "Q5：次のテキストボックスに回答を記入してください。", "",""],
+            ["q6", "text",  "Q6：次のテキストボックスに回答を記入してください。q6", "",""],
+            ["q7", "text",  "Q7：・・・", "",""],
+            ["q8", "text",  "Q8：・・・", "",""],
+            ["q9", "text",  "Q9：・・・<br>2<br>3<br>4<br>5<br>6", "",""]
+        ];
+
+        var readObj = new EnqueteModels.enquete();
+        readObj.retrieve({where: {Name: {eq:unameId }}},function(err,records,event){
+            if(err) {
+                alert(err.message);
+            }
+            else {  
+                for ( var idx in QAData ){
+                    if(QAData[idx][1] == 'check'){
+                        saveData[QAData[idx][0]] = [false,false,false,false];
+                    }
+                    else{
+                        saveData[QAData[idx][0]] = "";
+                    }
+                }
+
+                records.forEach(function(record) {
+                    QAData[0][4] = record.get("Q1__c");
+                    QAData[1][4] = record.get("Q2__c");
+                    QAData[2][4] = record.get("Q3__c");
+                    QAData[3][4] = record.get("Q4__c");
+                    QAData[4][4] = record.get("Q5__c");
+                    QAData[5][4] = record.get("Q6__c");
+                    QAData[6][4] = record.get("Q7__c");
+                    QAData[7][4] = record.get("Q8__c");
+                    QAData[8][4] = record.get("Q9__c");
+                    // ID はここでとる。
+                    saveData["Id"] = record.get("Id");
+                    for ( var idx in QAData ){
+                        if(QAData[idx][1] == 'check'){
+                            saveData[QAData[idx][0]] = JSON.parse(QAData[idx][4]);
+                        }
+                        else{
+                            saveData[QAData[idx][0]] = QAData[idx][4];
+                        }
+                    }
+                });
+
+                console.log("read >>>",saveData);
+
+                // レコード読み込み後にレンダリング開始する
+                ReactDOM.render(
+                    <AppBase key="appbase01" data={QAData} savepage={savePage}/>,
+                    document.getElementById('app-container'));
+            }
+
+        });
+
+        savePage = function(){
+        console.log("save >>>",saveData);
+            var myObj = new EnqueteModels.enquete();
+            
+            saveData['Name'] = unameId;
+            var data = convertData(saveData);
+            myObj.set('Id',saveData['Id']);
+
+            myObj.set('Name',saveData['Name']);
+            myObj.set('Q1__c',saveData['q1']);
+            myObj.set('Q2__c',JSON.stringify(saveData['q2'],null,'\t'));
+            myObj.set('Q3__c',String(saveData['q3']));
+            myObj.set('Q4__c',saveData['q4']);
+            myObj.set('Q5__c',saveData['q5']);
+            myObj.set('Q6__c',saveData['q6']);
+            myObj.set('Q7__c',saveData['q7']);
+            myObj.set('Q8__c',saveData['q8']);
+            myObj.set('Q9__c',saveData['q9']);
+
+            myObj.upsert(function(err,results) {
+                if(err) { 
+                    console.log(err);
+                    alert(err.message);
+                }
+                else {
+                    console.log(results); 
+                    saveData['Id'] = results[0];
+                }
+            });
+        }
+
+        createQAMap = function(){
+            var ret = {}
+            for ( data in QAData ){
+                ret[QAData[data][0]] = QAData[data][1];
+            }
+            return ret;
+        }
+
+        convertData = function(inData){
+            var qamap = createQAMap();
+            var ret = {};
+            for (key in inData){
+                var val = inData[key];
+                if (qamap[key] == 'check' ){
+                    ret[key] = JSON.stringify(val,null,'\t');
+                }
+                else{
+                    ret[key] = val;
+                }
+            }
+            return ret;
+        }
+
+//ここから部ファイルに切り出しできるはず。
+class AppBase extends React.Component {
+    constructor(props) {
+        super(props);
+        var index = 0
+        this.state = {
+            data: this.props.data,
+            index: index
+        }
+
+        this.nextpage = this.nextpage.bind(this);
+        this.prevpage = this.prevpage.bind(this);
+        this.savePage = this.savePage.bind(this);
+        this.resetPage = this.resetPage.bind(this);
+    }
+
+
+    render() {
+        var dt = this.state.data[this.state.index];
+        var saveFlg = (this.state.data.length == this.state.index + 1);
+
+        var items = [];
+
+        items.push(<EnqueteTitle key="title" setName={uname}/>);
+        
+        if (this.state.index + 1 <= this.state.data.length　){
+            items.push(<QAIndicator key="QAIndicator" total={this.state.data.length} now={this.state.index + 1} />);
+            items.push(
+                <div className="form-group" key="form-group">
+                    <Page key={"page_"+dt[0]} oid={dt[0]} type={dt[1]} text={dt[2]} vals={dt[3]} value={saveData[dt[0]]} />
+                </div>);
+            items.push(<Pagenation key="pgn" flg={saveFlg} prevpage={this.prevpage} nextpage={this.nextpage} savepage={this.savePage}/>);
+
+        }
+        else{
+            items.push(<div key="txt" className="form-group">ほぞんしました。 </div>);
+            items.push(<Restart key="msg" message="ほぞんしました。" resetPage={this.resetPage}/>);
+        }        
+
+        return (
+            <div className="App" key="app01">
+                {items}
+            </div>
+        );
+
+    }
+    // 次のぺー時
+    nextpage() {
+        if (this.state.data.length >= this.state.index + 1) {
+            this.setState({
+                index: this.state.index += 1
+            });
+        }
+    }
+
+    // 前のページ
+    prevpage() {
+        if (this.state.index > 0) {
+            this.setState({
+                index: this.state.index -= 1
+            });
+        }
+    }
+
+    savePage(){
+        this.setState({
+            index: this.state.index += 1
+        });
+        this.props.savepage();
+    }
+
+    resetPage(){
+        this.setState({
+            index: this.state.index = 0
+        });
+    }
+
+    update(setAry) {
+        this.setState({
+            index: setAry
+        });
+    }
+}
+class Restart extends React.Component {
+    render() {
+        return (
+            <div key="resetBtn" className="resetBtn" onClick={this.props.resetPage}>再度入力する。</div>
+        );
+    }
+}
+class EnqueteTitle extends React.Component {
+    render() {
+        return (
+            <div key="enquete_Title">{this.props.setName+"さんへのアンケート"}</div>
+        );
+    }
+}
+
+class QAIndicator extends React.Component {
+    render() {
+        const items = [];
+        for (let i = 1; i <= this.props.total; i++) {
+            if (this.props.now == i) {
+                items.push(<IndicatorMod key={"indicator_"+i} index={i} class="onStat" value="■"/>)
+            }
+            else if (this.props.now < i){
+                items.push(<IndicatorMod key={"indicator_"+i} index={i} class="offStat" value="●"/>)
+            }
+            else{
+                items.push(<IndicatorMod key={"indicator_"+i} index={i} class="passStat" value="●"/>)
+            }
+        }
+        return <div key="QAIndicator" className="QAIndicator parent"><div className="inner">{items}</div></div>
+    }
+}
+class IndicatorMod extends React.Component {
+    render() {
+        return <div key={"ind_"+this.props.index} className={"Indicator " + this.props.class}>{this.props.value}</div>
+    }
+}
+class Page extends React.Component {
+    render() {
+        return (
+            <section className="Page" key={"page_"+this.props.oid}>
+                <div className="Contents" key={"contents_"+this.props.oid}>
+                    <form key={"form_"+this.props.oid}>
+                        <QuestionMod key={"q_"+this.props.oid } text={this.props.text} />
+                        <AnswerMod key={"ans_"+this.props.oid } oid={this.props.oid} type={this.props.type} vals={this.props.vals} value={this.props.value} />
+                    </form>
+                </div>
+            </section >
+        )
+    }
+}
+
+class QuestionMod extends React.Component {
+    render() {
+        var items = [];
+
+        this.props.text.split("<br>").map((m,index) => 
+            items.push(<p key={index}>{m}</p>)
+        );
+
+        return (
+            <div className="Question" key="Question">{items}</div>
+        );
+
+    }
+}
+
+class AnswerMod extends React.Component {
+    render() {
+    // 種類を増やすのはここ。
+        if (this.props.type == 'text') {
+            return <TextMod key={this.props.oid} id={this.props.oid} val={this.props.value} value={this.props.value}  />;
+        }
+        else if (this.props.type == 'textarea') {
+            return <TextAreaMod key={this.props.oid} id={this.props.oid} val={this.props.value} value={this.props.value}  />;
+        }
+        else if (this.props.type == 'check') {
+            var ary = this.props.vals;
+            return (<div>
+                {ary.map((val, index) => {
+                    return <CheckMod  key={"chkmod_"+this.props.oid+"_"+index} id={this.props.oid} index={index} val={val} value={this.props.value[index]} />;
+                })}</div>
+            );
+        }
+        else if (this.props.type == 'radio') {
+            var ary = this.props.vals;
+            return (<div>
+                {ary.map((val, index) => {
+                    return <RadioMod  key={"rdomod_"+this.props.oid+"_"+index} id={this.props.oid} index={index} val={val} value={Number(this.props.value) === index} />;
+                })}</div>
+            );
+        }
+        else {
+            //          return <p>!!</p>
+        }
+    }
+}
+
+class TextMod extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            id: this.props.id,
+            textValue: this.props.val
+        }
+
+        this.changeText = this.changeText.bind(this);
+
+    }
+
+    changeText(e) {
+        this.setState({ textValue: e.target.value });
+        saveData[this.props.id] = e.target.value
+    }
+
+    render() {
+    var key = "txt_" + this.props.id
+    var id = "txt_" + this.props.id
+        return (
+                <input type="text" className="form-control" id={id} key={key} value={this.state.textValue} onChange={this.changeText}/>
+        );
+    }
+}
+
+class TextAreaMod extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            id: this.props.id,
+            textValue: this.props.val
+        }
+
+        this.changeText = this.changeText.bind(this);
+
+    }
+
+    changeText(e) {
+        this.setState({ textValue: e.target.value });
+        saveData[this.props.id] = e.target.value
+    }
+
+    render() {
+        var key = "txt_" + this.props.id;
+        var name = "txt_" + this.props.id;
+
+        return (
+                <textarea className="form-control" id={name} key={key} value={this.state.textValue} rows="5" cols="101" onChange={this.changeText}></textarea>
+        );
+    }
+}
+
+class CheckMod extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            id: this.props.id,
+            value: this.props.value
+        }
+
+        this.changeState = this.changeState.bind(this);
+    }
+    changeState(e) {
+        this.setState({ value: e.target.checked });
+        saveData[this.props.id][this.props.index] = e.target.checked;
+    }
+
+    render() {
+        var key = "chk_" + this.props.id + "_" + this.props.index;
+        var name = "chk_" + this.props.id;
+
+        return (
+            <p key={"pchk_" + this.props.id + "_" + this.props.index}>
+                <input type="checkbox" className="form-control" name={name} key={key} defaultChecked={this.props.value} value={this.state.value}  onChange={this.changeState} />{this.props.val}
+            </p>
+        );
+    }
+}
+
+class RadioMod extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            id: this.props.id,
+            value: this.props.value
+        }
+
+        this.changeState = this.changeState.bind(this);
+    }
+    changeState(e) {
+        this.setState({ value: e.target.checked });
+        if (e.target.checked  === true ){
+            saveData[this.props.id] = this.props.index;
+        }
+    }
+
+    render() {
+        var name = "rdo_" + this.props.id;
+        var key = "rdo_" + this.props.id + "_" + this.props.index;
+        return (
+            <p key={"prdo_" + this.props.id + "_" + this.props.index}>
+                <input type="radio" className="form-control" name={name} key={key} value={this.state.value} defaultChecked={this.props.value} onChange={this.changeState} />{this.props.val}
+            </p>
+        );
+    }
+}
+
+class Pagenation extends React.Component {
+    render() {
+
+        if (this.props.flg) {
+            return (
+                <div className="Pagenation" key="pgn">
+                    <PagenationButton key="pgn_btn1" name="prevPage leftBtn" text="prev" event={this.props.prevpage} />
+                    <PagenationButton key="pgn_btn2" name="savePage saveBtn" text="save" event={this.props.savepage} />
+                </div >
+            );
+
+        }
+
+        return (
+            <div className="Pagenation" key="pgn">
+                <PagenationButton key="pgn_btn3" name="prevPage leftBtn" text="prev" event={this.props.prevpage} />
+                <PagenationButton key="pgn_btn4" name="nextPage rightBtn" text="next" event={this.props.nextpage} />
+            </div >
+        );
+    }
+}
+
+class PagenationButton extends React.Component {
+    render() {
+        return (
+            <div key="rstBtn" className={this.props.name} onClick={this.props.event}>{this.props.text}</div>
+        );
+    }
+}
+
+        //ここまで、外部ファイルに切り出しできるはず。
+
+
+    </script>
+    <style>
+.App {
+    text-align: center;
+}
+
+.body {
+    padding: 0;
+    margin: 0;
+}
+
+ .Title {
+    height: 2rem;
+    line-height: 2rem;
+    margin: 0;
+    background-color: lightblue;
+}
+
+.Indicator{
+  float:left;
+}
+
+ .Page {
+    height: 10rem;
+    width: 100%;
+    background-color: white;
+}
+
+.Contents p {
+    margin: 0;
+}
+
+ .Pagenation {
+    position: absolute;
+    bottom: 0px;
+    float: left;
+    width: 100%;
+    height: 3rem;
+    background-color: lightgray;
+}
+
+ .leftBtn {
+    user-select: none;
+    float: left;
+    width: 46%;
+    height: 2rem;
+    line-height: 2rem;
+    margin: 0.5% 1% 2% 2%;
+    background-color: green;
+    color: white;
+    font-weight: 700;
+}
+ .leftBtn:hover{
+    background-color: lightgreen;
+}
+ .leftBtn:active{
+    background-color: darkgreen;
+}
+
+
+ .rightBtn {
+    user-select: none;
+    float: left;
+    width: 46%;
+    height: 2rem;
+    line-height: 2rem;
+    margin: 0.5% 2% 2% 1%;
+    background-color: coral;
+    color: white;
+    font-weight: 700;
+}
+ .rightBtn:hover{
+    background-color: lightcoral;
+}
+ .rightBtn:active{
+    background-color: #ea5c5c;
+}
+
+ .saveBtn {
+    user-select: none;
+    float: left;
+    width: 46%;
+    height: 2rem;
+    line-height: 2rem;
+    margin: 0.5% 2% 2% 1%;
+    background-color: red;
+    color: white;
+    font-weight: 700;
+
+}
+ .saveBtn:hover{
+    background-color: lightsalmon;
+}
+ .saveBtn:active{
+    background-color: orangered;
+}
+
+.resetBtn{
+    user-select: none;
+    float: left;
+    width: 30%;
+    height: 2rem;
+    line-height: 2rem;
+    margin: 0.5% 35% 2% 35%;
+    background-color: red;
+    color: white;
+    font-weight: 700;
+
+}
+ .resetBtn:hover{
+    background-color: lightsalmon;
+}
+ .resetBtn:active{
+    background-color: orangered;
+}
+
+ .QAIndicator {
+    user-select: none;
+    height: 2rem;
+    background-color: lightyellow;
+    line-height: 2rem;
+    font-size: 1.0rem;
+}
+
+.parent{
+  position: relative;
+}
+.inner{
+  position: absolute;
+  left: 50%;
+  -webkit-transform: translateY(0%) translateX(-50%);
+  transform: translateY(0%) translateX(-50%);
+}
+
+.onStat{
+    color:green;
+}
+.offStat{
+    color:lightgray;
+}
+.passStat{
+    color:gray;
+}
+
+    </style>
+</head>
+
+<body>
+    <div id="app-container"> </div>
+</body>
+</html>
+</apex:page>

@@ -1,0 +1,15 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,force:lightningQuickAction" controller="testUserController" access="global">
+    <!-- レコードIDを変数にセット -->
+    <aura:attribute name="recordId" type="Id" />
+    <aura:attribute name="account" type="Account" />
+
+    <!-- handler -->
+    <aura:handler name="init" action="{!c.init}" value="{!this}" />
+    
+    <div class="slds-form-element slds-m-bottom--small slds-is-required">
+        <label class="slds-form-element__label">Name</label>
+        <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon--right">
+            <ui:outputText value="{!v.account.Name}" class="slds-input" aura:id="accountName" />
+        </div>
+    </div>
+</aura:component>

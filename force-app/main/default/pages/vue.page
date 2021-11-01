@@ -1,0 +1,519 @@
+<apex:page docType="html-5.0" sidebar="false" showHeader="false">
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+
+</head>
+
+<body>
+    <div id="app" class="App">
+</div>
+</body>
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/vuex/dist/vuex.js"></script>
+    <script src="https://unpkg.com/element-ui@1.1.6/lib/index.js"></script>
+
+
+    <apex:remoteObjects jsNamespace="EnqueteModels">
+        <apex:remoteObjectModel name="Enquete__c" jsShorthand="enquete" fields="Id,Name">
+            <apex:remoteObjectField name="Q1__c" jsShorthand="q1"/>
+            <apex:remoteObjectField name="Q2__c" jsShorthand="q2"/>
+            <apex:remoteObjectField name="Q3__c" jsShorthand="q3"/>
+            <apex:remoteObjectField name="Q4__c" jsShorthand="q4"/>
+            <apex:remoteObjectField name="Q5__c" jsShorthand="q5"/>
+            <apex:remoteObjectField name="Q6__c" jsShorthand="q6"/>
+            <apex:remoteObjectField name="Q7__c" jsShorthand="q7"/>
+            <apex:remoteObjectField name="Q8__c" jsShorthand="q8"/>
+            <apex:remoteObjectField name="Q9__c" jsShorthand="q9"/>
+        </apex:remoteObjectModel>
+    </apex:remoteObjects>
+    
+    <script type="text/javascript">
+
+    var startIndex = 2;
+        var saveData = {};
+        var uname = '{!$User.LastName} {!$User.FirstName}';
+        var unameId = '{!$User.LastName}_{!$User.FirstName}_{!$User.Id}';
+
+       var QAData = [
+            ["q1", "text",  "Q1：次のテキストボックスに回答を記入してください。<br>（120文字まで）", "","1"],
+            ["q2", "checkbox", "Q2：次のチェックボックスから選択してください。", ["a1", "a2", "a3", "a4"],""],
+            ["q3", "radio", "Q3：次のラジオボタンから選択してください。", ["a1", "a2", "a3", "a4"],""],
+            ["q4", "textarea",  "Q4：次のテキストボックスに回答を記入してください。", "",""],
+            ["q5", "text",  "Q5：次のテキストボックスに回答を記入してください。", "",""],
+            ["q6", "text",  "Q6：次のテキストボックスに回答を記入してください。q6", "",""],
+            ["q7", "text",  "Q7：・・・", "",""],
+            ["q8", "text",  "Q8：・・・", "",""],
+            ["q9", "text",  "Q9：・・・<br>2<br>3<br>4<br>5<br>6", "",""]
+        ];
+
+        var readObj = new EnqueteModels.enquete();
+        readObj.retrieve({where: {Name: {eq:unameId }}},function(err,records,event){
+            if(err) {
+                alert(err.message);
+            }
+            else {  
+                for ( var idx in QAData ){
+                    if(QAData[idx][1] == 'check'){
+                        saveData[QAData[idx][0]] = [false,false,false,false];
+                    }
+                    else{
+                        saveData[QAData[idx][0]] = "";
+                    }
+                }
+
+                records.forEach(function(record) {
+                    QAData[0][4] = record.get("Q1__c");
+                    QAData[1][4] = record.get("Q2__c");
+                    QAData[2][4] = record.get("Q3__c");
+                    QAData[3][4] = record.get("Q4__c");
+                    QAData[4][4] = record.get("Q5__c");
+                    QAData[5][4] = record.get("Q6__c");
+                    QAData[6][4] = record.get("Q7__c");
+                    QAData[7][4] = record.get("Q8__c");
+                    QAData[8][4] = record.get("Q9__c");
+                    // ID はここでとる。
+                    saveData["Id"] = record.get("Id");
+                    for ( var idx in QAData ){
+                        if(QAData[idx][1] == 'check'){
+                            saveData[QAData[idx][0]] = JSON.parse(QAData[idx][4]);
+                        }
+                        else{
+                            saveData[QAData[idx][0]] = QAData[idx][4];
+                        }
+                    }
+                });
+
+                console.log("read >>>",saveData);
+
+                // レコード読み込み後にレンダリング開始する
+
+            }
+
+        });
+
+        savePage = function(){
+        console.log("save >>>",saveData);
+            var myObj = new EnqueteModels.enquete();
+            
+            saveData['Name'] = unameId;
+            var data = convertData(saveData);
+            myObj.set('Id',saveData['Id']);
+
+            myObj.set('Name',saveData['Name']);
+            myObj.set('Q1__c',saveData['q1']);
+            myObj.set('Q2__c',JSON.stringify(saveData['q2'],null,'\t'));
+            myObj.set('Q3__c',String(saveData['q3']));
+            myObj.set('Q4__c',saveData['q4']);
+            myObj.set('Q5__c',saveData['q5']);
+            myObj.set('Q6__c',saveData['q6']);
+            myObj.set('Q7__c',saveData['q7']);
+            myObj.set('Q8__c',saveData['q8']);
+            myObj.set('Q9__c',saveData['q9']);
+
+            myObj.upsert(function(err,results) {
+                if(err) { 
+                    console.log(err);
+                    alert(err.message);
+                }
+                else {
+                    console.log(results); 
+                    saveData['Id'] = results[0];
+                }
+            });
+        }
+
+        createQAMap = function(){
+            var ret = {}
+            for ( data in QAData ){
+                ret[QAData[data][0]] = QAData[data][1];
+            }
+            return ret;
+        }
+
+        convertData = function(inData){
+            var qamap = createQAMap();
+            var ret = {};
+            for (key in inData){
+                var val = inData[key];
+                if (qamap[key] == 'check' ){
+                    ret[key] = JSON.stringify(val,null,'\t');
+                }
+                else{
+                    ret[key] = val;
+                }
+            }
+            return ret;
+        }
+
+const store = new Vuex.Store({
+    state: {
+        index: 0,
+        qaData : QAData,
+        savedata : saveData
+
+    },
+    mutations: {
+        increment (state) {
+            if (state.qaData.length > state.index+1 ){    
+                state.index++;
+            }
+        },
+        decrement (state) {
+            if ( state.index > 0 ){
+                state.index--;
+            }
+
+        },
+        set(state,key,saveData){
+            savePage[key]=saveData 
+        },
+        save(state){
+
+        }
+    },
+    getters:{
+        QA(state){
+            return state.qaData;   
+        },
+        QAIndex(state){
+            return state.qaData[state.index];   
+        },
+        index(state){
+            return state.index;
+        }
+    }
+});
+
+Vue.component('QAIndicator',{
+    template:`
+        <div key="QAIndicator" class="QAIndicator parent">
+            <div class="inner">
+                <div v-for="item in changeIndex(this.$store.state.index,this.$store.state.qaData)" v-bind:class="{Indicator:true,onStat:item.onStat,offStat:item.offStat,passStat:item.passStat}">{{item.value}}</div>
+            </div>
+        </div>
+    `,
+    methods: {
+        changeIndex:function(index,ary){
+            console.log("??",index,ary);
+            var items = [];
+            for (let i = 0; i < ary.length; i++) {
+                if ( index == i) {
+                    items.push({onStat:true,offStat:false,passStat:false,value:"■"})
+                }
+                else if ( index < i){
+                    items.push({onStat:false,offStat:true,passStat:false,value:"◆"})
+                }
+                else{
+                    items.push({onStat:false,offStat:false,passStat:true,value:"◆"})
+                }
+            }
+
+            return items
+
+        }
+    }
+});
+
+
+let Option = Vue.extend({
+    props:['item'],
+    template:
+    `<div>
+        <div class="Question"><p v-for="line in spliteLine(item[2])">{{line}}</p></div>
+        <div v-for="record in item[3]"><input :type=item[1] name=item[0] class="form-control" s />{{record}}</div>
+    </div>
+    `,
+    methods:{
+        changeValue:function(){
+        },
+        spliteLine:function(str){
+            var items = [];
+            let ary = str.split("<br>");
+            for (let i = 0 ; i < ary.length ; i++){
+                console.log(ary,ary[i]);
+                items.push(ary[i]);
+            }
+            return items;
+        }
+
+    }
+});
+
+let  TextBox = Vue.extend({
+    data  : function(){ return{changeV : ''} },
+    props : ['item'],
+    template:
+    `<div>
+        <div class="Question"><p v-for="line in spliteLine(item[2])">{{line}}</p></div>
+        <div><input type="text" class="form-control" v-model="changeV" @input="onInput" @change="changeValue" /></div>
+    </div>
+    `,
+    methods:{
+        changeValue:function(){
+            console.log(">>",this.changeV);
+        },
+        onInput:function(){
+            console.log("??",this.changeV);
+        },
+        spliteLine:function(str){
+            var items = [];
+            let ary = str.split("<br>");
+            for (let i = 0 ; i < ary.length ; i++){
+                console.log(ary,ary[i]);
+                items.push(ary[i]);
+            }
+            return items;
+        }
+
+    }
+});
+
+let TextArea = Vue.extend({
+    props:['item'],
+    template:
+    `<div>
+         <div class="Question"><p v-for="line in spliteLine(item[2])">{{line}}</p></div>
+       <div><TextArea class="form-control" /></div>
+    </div>
+    `,
+        methods:{
+        changeValue:function(){
+            console.log(">>",this.changeV);
+        },
+        onInput:function(){
+            console.log("??",this.changeV);
+        },
+        spliteLine:function(str){
+            var items = [];
+            let ary = str.split("<br>");
+            for (let i = 0 ; i < ary.length ; i++){
+                console.log(ary,ary[i]);
+                items.push(ary[i]);
+            }
+            return items;
+        }
+
+    }
+});
+
+
+
+
+let myButton = Vue.extend({
+    name:'myButton',
+    props:['leftBtn','rightBtn','prevBtn','nextBtn','saveBtn','text'],
+    template:'<div v-on:click="myclick($event,text)" :class="{prevBtn:prevBtn ,nextBtn:nextBtn ,leftBtn:leftBtn ,rightBtn:rightBtn ,saveBtn:saveBtn}" >{{text}}</div>',
+    methods:{
+        myclick:function(event,text){
+            if (text === 'save'){
+            }
+            else if(text === 'prev'){
+                store.commit('decrement')
+            }
+            else{
+                store.commit('increment')
+            }
+        }
+    }
+    
+});
+
+let pager = Vue.extend({
+    name:'pager',
+    components:{myButton},
+    template:`
+    <div class="Pagenation">
+        <myButton                :leftBtn=true  :rightBtn=false :prevBtn=true  :nextBtn=false :saveBtn=false text="prev" />
+        <myButton v-if="saveFlg" :leftBtn=false :rightBtn=true  :prevBtn=false :nextBtn=false :saveBtn=true  text="save" />
+        <myButton v-else         :leftBtn=false :rightBtn=true  :prevBtn=false :nextBtn=true  :saveBtn=false text="next" />
+    </div>
+    `,
+    computed :{
+        saveFlg : function () {
+            console.log( (this.$store.state.index === this.$store.state.qaData.length -1 )); 
+            return (this.$store.state.index === this.$store.state.qaData.length -1 ); 
+        }
+    }
+
+});
+
+let Area = Vue.extend({
+    props:['item'],
+    template:`
+    <div class="Contents">
+    <TextBox v-if="item[1] === 'text'" :item=item ></TextBox>
+    <TextArea v-else-if="item[1] === 'textarea'" :item=item ></TextArea>
+    <Option v-else :item=item ></Option>
+    <pager  />
+    </div>
+    `,
+    components:{Option,TextArea,TextBox,pager}
+});
+
+
+
+var Page = Vue.extend({
+    components:{Area},
+    template:'<div class="App"><QAIndicator ></QAIndicator><Area :item=this.$store.getters.QAIndex ></Area></div>'
+});
+
+
+new Vue({
+  el: '#app',
+  store,
+  props:['qaAry'],
+  template:`<Page class="Page" ></Page>`,
+  components:{Page}
+});
+
+    </script>
+    <style>
+.App {
+    text-align: center;
+}
+
+.body {
+    padding: 0;
+    margin: 0;
+}
+
+ .Title {
+    height: 2rem;
+    line-height: 2rem;
+    margin: 0;
+    background-color: lightblue;
+}
+
+.Indicator{
+  float:left;
+}
+
+ .Page {
+    height: 10rem;
+    width: 100%;
+    background-color: white;
+}
+
+.Contents p {
+    margin: 0;
+}
+
+ .Pagenation {
+    position: absolute;
+    bottom: 0px;
+    float: left;
+    width: 100%;
+    height: 3rem;
+    background-color: lightgray;
+}
+
+ .leftBtn {
+    user-select: none;
+    float: left;
+    width: 46%;
+    height: 2rem;
+    line-height: 2rem;
+    margin: 0.5% 1% 2% 2%;
+    background-color: green;
+    color: white;
+    font-weight: 700;
+}
+ .leftBtn:hover{
+    background-color: lightgreen;
+}
+ .leftBtn:active{
+    background-color: darkgreen;
+}
+
+
+ .rightBtn {
+    user-select: none;
+    float: left;
+    width: 46%;
+    height: 2rem;
+    line-height: 2rem;
+    margin: 0.5% 2% 2% 1%;
+    background-color: coral;
+    color: white;
+    font-weight: 700;
+}
+ .rightBtn:hover{
+    background-color: lightcoral;
+}
+ .rightBtn:active{
+    background-color: #ea5c5c;
+}
+
+ .saveBtn {
+    user-select: none;
+    float: left;
+    width: 46%;
+    height: 2rem;
+    line-height: 2rem;
+    margin: 0.5% 2% 2% 1%;
+    background-color: red;
+    color: white;
+    font-weight: 700;
+
+}
+ .saveBtn:hover{
+    background-color: lightsalmon;
+}
+ .saveBtn:active{
+    background-color: orangered;
+}
+
+.resetBtn{
+    user-select: none;
+    float: left;
+    width: 30%;
+    height: 2rem;
+    line-height: 2rem;
+    margin: 0.5% 35% 2% 35%;
+    background-color: red;
+    color: white;
+    font-weight: 700;
+
+}
+ .resetBtn:hover{
+    background-color: lightsalmon;
+}
+ .resetBtn:active{
+    background-color: orangered;
+}
+
+ .QAIndicator {
+    user-select: none;
+    height: 2rem;
+    background-color: lightyellow;
+    line-height: 2rem;
+    font-size: 1.0rem;
+}
+
+.parent{
+  position: relative;
+}
+.inner{
+  position: absolute;
+  left: 50%;
+  -webkit-transform: translateY(0%) translateX(-50%);
+  transform: translateY(0%) translateX(-50%);
+}
+
+.onStat{
+    color:green;
+}
+.offStat{
+    color:lightgray;
+}
+.passStat{
+    color:gray;
+}
+
+    </style>
+</html>
+</apex:page>

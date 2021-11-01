@@ -1,0 +1,5 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,force:lightningQuickAction" access="global" >
+    <lightning:layout class="slds-page-header slds-page-header--object-home">
+        <iframe src="https://firstapp-haranoso-20171215.herokuapp.com/" frameborder="0" width="100%" height="300px"/>
+    </lightning:layout>
+</aura:component>

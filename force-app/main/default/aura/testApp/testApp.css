@@ -1,0 +1,41 @@
+.THIS {
+    
+}
+
+.THIS .box{
+    width:100%;
+        background-color: darkgray;
+}
+
+.THIS .clearfix:after {
+  content:" ";
+  display:block;
+  clear:both;
+}
+
+.THIS .boxContainer{
+  float: left;
+  overflow: hidden;
+  width:33%;
+  height:33px;
+}
+
+.THIS .leftBox {
+    background-color: green;
+}
+
+.THIS .centerBox {
+    background-color: yellow;
+}
+
+.THIS .rightBox {
+    background-color: red;
+}
+
+.THIS .off {
+    opacity : 0.1;
+}
+
+.THIS .on {
+    opacity : 1.0;
+}

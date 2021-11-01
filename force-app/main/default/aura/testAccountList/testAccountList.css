@@ -1,0 +1,27 @@
+.THIS {
+    float:left;
+    width:50%;
+    height:100%;
+    background-color:white;
+}
+
+
+
+.THIS .inner-col{
+    float:left;
+    
+}
+
+.THIS .clearfix:after {
+    content:" ";
+    display:block;
+    clear:both;
+}
+
+.THIS .inner-row:hover{
+    width: 100%;
+    display: inline-block;
+}
+.THIS .inner-row:hover{
+    background-color:yellow;
+}

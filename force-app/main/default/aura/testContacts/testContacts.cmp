@@ -1,0 +1,21 @@
+<aura:component controller="testContactListController" access="global">
+    
+    <aura:attribute name="accountID" type="String" default=""/>
+    <aura:handler name="change" value="{!v.accountID}" action="{!c.onAccountChange}"/>
+    
+    <aura:attribute name="contacts" type="Contact[]" />
+    <!-- handler -->
+    <section class="contacts">
+      <p>取引先責任者</p>
+      <ul class="">
+          <aura:iteration items="{!v.contacts}" var="contact">
+              <li class="contactsInfo"><div class="clearfix" >
+                  <p class="inner-col">id:{!contact.Id}</p>
+                  <p class="inner-col">Name:{!contact.Name}</p>
+                  <p class="inner-col">e-mail:{!contact.Name}</p>
+                  <p class="inner-col">Title:{!contact.Title}</p></div>
+              </li>
+          </aura:iteration>
+      </ul>
+    </section>
+</aura:component>
